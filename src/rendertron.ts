@@ -9,7 +9,7 @@ import puppeteer from 'puppeteer';
 import url from 'url';
 
 import { Renderer, ScreenshotError } from './renderer';
-import { Config, ConfigManager } from './config';
+import { Config, ConfigManager, Cookie } from './config';
 
 /**
  * Rendertron rendering service. This runs the server which routes rendering
@@ -18,28 +18,30 @@ import { Config, ConfigManager } from './config';
 export class Rendertron {
   app: Koa = new Koa();
   private config: Config = ConfigManager.config;
+  private cookies: Array<Cookie> = [];
   private renderer: Renderer | undefined;
   private port = process.env.PORT || null;
   private host = process.env.HOST || null;
 
-  async createRenderer(config: Config) {
+  async createRenderer(config: Config, cookies: Array<Cookie>) {
     const browser = await puppeteer.launch({ args: config.puppeteerArgs });
 
     browser.on('disconnected', () => {
-      this.createRenderer(config);
+      this.createRenderer(config, cookies);
     });
 
-    this.renderer = new Renderer(browser, config);
+    this.renderer = new Renderer(browser, config, cookies);
   }
 
-  async initialize(config?: Config) {
+  async initialize(config?: Config, cookies?: Array<Cookie>) {
     // Load config
     this.config = config || await ConfigManager.getConfiguration();
+    this.cookies = cookies || await ConfigManager.getCookies();
 
     this.port = this.port || this.config.port;
     this.host = this.host || this.config.host;
 
-    await this.createRenderer(this.config);
+    await this.createRenderer(this.config, this.cookies);
 
     this.app.use(koaLogger());
 

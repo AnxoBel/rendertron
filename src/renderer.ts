@@ -2,7 +2,7 @@ import puppeteer, { ScreenshotOptions } from 'puppeteer';
 import url from 'url';
 import { dirname } from 'path';
 
-import { Config } from './config';
+import { Config, Cookie } from './config';
 
 type SerializedResponse = {
   status: number;
@@ -24,10 +24,12 @@ const MOBILE_USERAGENT =
 export class Renderer {
   private browser: puppeteer.Browser;
   private config: Config;
+  private cookies: Array<Cookie>;
 
-  constructor(browser: puppeteer.Browser, config: Config) {
+  constructor(browser: puppeteer.Browser, config: Config, cookies: Array<Cookie> = []) {
     this.browser = browser;
     this.config = config;
+    this.cookies = cookies;
   }
 
   private restrictRequest(requestUrl: string): boolean {
@@ -83,6 +85,10 @@ export class Renderer {
     }
 
     const page = await this.browser.newPage();
+    
+    if (this.cookies) {
+        await page.setCookie(...this.cookies);
+    }
 
     // Page may reload when setting isMobile
     // https://github.com/GoogleChrome/puppeteer/blob/v1.10.0/docs/api.md#pagesetviewportviewport

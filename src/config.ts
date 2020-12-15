@@ -24,7 +24,7 @@ import * as path from 'path';
 import * as os from 'os';
 
 const CONFIG_PATH = path.resolve(__dirname, '../config.json');
-
+const COOKIES_PATH = path.resolve(__dirname, '../cookies.json');
 
 export type Config = {
     cache: 'datastore' | 'memory' | 'filesystem' | null;
@@ -39,6 +39,18 @@ export type Config = {
     puppeteerArgs: Array<string>;
     renderOnly: Array<string>;
     closeBrowser: boolean;
+};
+
+export type Cookie = {
+    name: string;
+    value: string;
+    url?: string;
+    domain?: string;
+    path?: string;
+    expires?: number; //Unix time in seconds
+    httpOnly?: boolean;
+    secure?: boolean;
+    sameSite?: 'Strict' | 'Lax';
 };
 
 export class ConfigManager {
@@ -61,6 +73,8 @@ export class ConfigManager {
         closeBrowser: false
     };
 
+    public static cookies: Array<Cookie> = [];
+    
     static async getConfiguration(): Promise<Config> {
         // Load config.json if it exists.
         if (fse.pathExistsSync(CONFIG_PATH)) {
@@ -74,6 +88,20 @@ export class ConfigManager {
             ConfigManager.config.cacheConfig = cacheConfig;
         }
         return ConfigManager.config;
+    }
+
+    static async getCookies(): Promise<Array<Cookie>> {
+        // Load cookies.json if it exists.
+        if (fse.pathExistsSync(COOKIES_PATH)) {
+            const cookiesJson = fse.readJSONSync(COOKIES_PATH);
+            
+            cookiesJson.forEach(function(c: Object) {
+                let cookie: Cookie = c as Cookie;
+                
+                ConfigManager.cookies.push(cookie);
+            })
+        }
+        return ConfigManager.cookies;
     }
 }
 
