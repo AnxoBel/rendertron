@@ -7,7 +7,7 @@ Only new code was added in a way that no break in the original code should happe
 
 ## How to use it
 
-Create on root directory a file called `cookies.json`. It expects a list of objects that follow the [Puppeteer specification](https://github.com/puppeteer/puppeteer/blob/v1.17.0/docs/api.md#pagesetcookiecookies). For example:
+Create in the main directory a file called `cookies.json`. It expects a list of objects that follow the [Puppeteer specification](https://github.com/puppeteer/puppeteer/blob/v1.17.0/docs/api.md#pagesetcookiecookies). For example:
 
 ```
 [
@@ -18,7 +18,7 @@ Create on root directory a file called `cookies.json`. It expects a list of obje
   },
   {
     "name": "cookie2",
-    "value": "test",
+    "value": "test"
   }
 ]
 
